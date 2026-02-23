@@ -1,0 +1,59 @@
+DECLARATIVE APPROACH - react js
+->it is a js library
+->with this we can make single page applications(SPA)
+# in multi page applications what happens is for every request the server will respond with a html page .... this  leads to performance issues and always a new dom is generated
+    ->amazon is a multi page application
+# now instead of this we use single page
+    =>during the first request the browser will download the entire frontend and from the next requests(AJAX - fetch function is used,response is json) 
+      only json data can be sent.
+    =>because of this no new dom will be created but instead the dom itself is changed
+    =>results in high performance
+
+->react never touches the actual dom, instead it maintains a virtual dom and does changes to it....
+->use the map method to loop through and return something
+->arrow function does this 
+  {
+    marks.map(m=><h2>{m}</h2>)
+  }
+  if there are no {} then automatically what is written that will be returned
+
+Component Hierarchy
+->root is the app Component followed by other ones
+->there is only parent-child relationship
+->naming for different component files should be meaningful
+#a react component can return max 1 element(by default), if we want to return more then create a parent class and do the rest
+->if we have created a new component then we must connect it to the existing hierarchy(import it in the root)
+    after this the child becomes nested to the parent
+    if we want some changes to the created component then in the parent pass arguements 
+->naming convention: props (properties, in react what ever arguements are passed this will be the parameter for that component)
+->based on our requirement/wish we can nest components either parent-component or component-component
+
+
+State
+whenever the application loads it will be rendered once
+->when we change one component then it must be re-rendered
+->sometimes the value might look to change but the page will not display that change
+-> for re-rendering react has a special function useState() / useState Hook-reason they hook to the lifecycle of the component, they are just js functions
+    it will not only re-render, it will also change the state
+->const increment=()=>{
+        setVal(val+1)
+        setVal(val+1)
+        setVal(val+1)
+    } this will not produce the result we want as here it will be re-rendered 3 times which causes a lot of load for the browser
+      and what happens is first setVal is rendered, second one is rendered and when the last setVal is there it will see the prev value and then give the result
+      to resolve this use like a function which is going to track the previous value
+->setter functions need to take care of the re-rendering
+->if the state doesnt not depend on the previous value then do it directly
+  else supply a function to keep a track of the previous value and do the necessary changes
+->re-rendering will occur when there is a change in the reference(a copy should be created)
+->for objects/arrays any operation will result to be refering to the same, rendering will not know when this has occured for that dont use like shift,push,pop
+  for those
+  let [marks,setMarks] = useState([1,2])
+    const pushed=()=>{
+        setMarks([...marks,123]) //create a copy and push 123
+    }
+
+    let [user,setUser] = useState({email:"test@mail.com"})
+    const pushed2=()=>{
+        setUser({...user,city:"hyd"}) //create a copy and push city
+    }
