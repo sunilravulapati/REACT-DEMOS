@@ -1,0 +1,78 @@
+operations like filter,map,reduce create a new array-can be used for State
+operations like pop,push,splice,shift,unshift mutate the existing array - avoid using them
+
+for parameterised functions call them by a call back
+    onClick={()=>function(parameter)}
+
+
+delete:
+const delMark=(index)=>{
+    setMarks(marks.filter((_,i)=>i!==index))
+}
+
+Object.keys(),Object.values(),Object.entries() - they return an array of keys and values
+
+
+Form Handling in React
+in forms the button is of type='submit' which generates onSubmit on the whole form
+->react has the ability to handle form and do validation, but it is very verbose and time-consuming
+    react hook / formic
+
+REACT HOOK FORM - designed to validate and submit form in react
+install: npm i react-hook-form
+import {useForm} from 'react-hook-form'
+call the function: useForm() : this returns an object
+    const {register,handleSubmit} = useForm()
+
+-> in input element the name will act as the key as we are going to return an object
+->register every element to the useForm hook
+    register function will take the name of the input element - name attribute is not required
+
+    <input type = "text" {...register("username")} placeholder="username" id="un"/>
+
+to submit a form create a function
+    const submitForm=(o)=>{
+        clg(o)
+    }
+
+User Validation
+it is recommended to validate the users even in the frontend though we have designed a backend which validates the user
+->burden on the backend
+=>hackers can bypass all the validation rules so we need to have a backend validation as well
+=>whenever we create a unique then indexes are created!
+-> to make like this where we can receive a response like this field is mandatory we use the formState
+
+Conditional rendering
+ternary operator: condition ? react-el1 : react-el2=>similar to if else
+other way: condition && react-el1=> similar to if
+
+->during development mode, when the component is pure it will be rendered normally
+    this is due to StrictMode in main.jsx and will be rendered twice
+->in react there is only a relation b/w parent - child but no child - child 
+    for that lifting state up
+
+Lifting State Up
+
+->problems:
+    time taking
+    sometimes the parent that has received the state which is not the one who should receive this should pass it on and that logic should be written
+    if there are more than one level this becomes a bit inefficient
+->if single level - lifting state up else use redux
+
+#render - means prepare to display
+#fetch function is used to get api calls
+#usually rendering is like batch processing
+
+SIDE-EFFECTS
+-> a component can render initially before displaying the content.
+-> if the component is about to make an api request it should wait until the initial rendering is completed
+-> only after the initial rendering should the component make an api request. if this happens together, it leads to unexpected bugs in the application
+We need to allow the component to make the initial rendering and then later only should api requests must be made
+
+useEffect(()=>{//effect function-outer functions},[//dependency function-optional])
+1. if there is no dependency array - useEffect(()=>{//effect function-outer functions})
+    this will run after every render
+2. if the dependency array is empty - useEffect(()=>{//effect function-outer functions},[])
+    this will only run after first initial render
+3. if there are dependencies - useEffect(()=>{//effect function-outer functions},[dependencies(states ex:counter or something else)-can be multiple])
+    this will run after every dependency change
