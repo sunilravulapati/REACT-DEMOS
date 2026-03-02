@@ -76,3 +76,215 @@ useEffect(()=>{//effect function-outer functions},[//dependency function-optiona
     this will only run after first initial render
 3. if there are dependencies - useEffect(()=>{//effect function-outer functions},[dependencies(states ex:counter or something else)-can be multiple])
     this will run after every dependency change
+
+->disable the strict mode as it will render the component twice.......this is done so that to check if there are any errors.....during development we should disable it so that we get to know 
+correctly how many times the component should render.
+
+2/3/26
+ROUTING
+->before we start the routing.....we should decide the root layout
+=>root component : App.jsx and root layout is the layout which we want
+=>react doesnt have internal routing application, for that we have an external one react router
+    npm i react-router(before v7), npm i react-router-dom(before v7)
+    npm i react-router(in v7 both of them are combined)
+->since the main layout is going to be the placeholder for the components in the header/nav bar use the Outlet from react-router to make the main section as the placeholder
+->then create the components you want
+->configure the routing for the above created components - connecting the components to its parent/parents with a path
+    use the root component to do routing
+    there is a module named createBrowserRouter from 'react-router' which creates the routing
+        const routingObj = createBrowserRouter() //this creates and returns an routingObj object
+        then use the RouterProvider component which takes the value router = {routingObj}
+=>whenever the application starts we must load the rootLayout then the home should load
+    every routingObj contains two properties: path and element
+        const routingObj = createBrowserRouter([{
+            path:"/",
+            element:<RootLayout/>,
+            children:[
+                {
+                path:"/",
+                element:<Home/>
+                },
+                {
+                path:"register",
+                element:<Register/>
+                },
+                {
+                path:"login",
+                element:<Login/>
+                },
+                {
+                path:"tech",
+                element:<Tech/>
+                }
+            ]
+        }])
+
+-> use NavLink from react-router 
+    because with anchor tag the entire page will refresh , it automatically creates an hyperlink , it dynamically adds an active class to it
+    <NavLink to=""></NavLink>
+->          {
+              path:"",
+              element: <Navigate to="java"/>
+            }
+    with this we can decide what we want to load - it can solve the white page issue
+    import Navigate from the react-router
+
+->at each component level we must use Outlet so that whatever children there are, their content will be displayed
+
+=>        <li><NavLink to="/" className={({ isActive }) => isActive ? "text-white" : "text-black"}>Home</NavLink></li>
+            this makes sure that it is clear for the users that they are in this particular component like head, productslist or contact us page
+
+->PROGRAMATIC NAVIGATION | MANUAL NAVIGATION
+To implement we have to import a special useNavigate hook which is a function that helps us to navigate, it returns a function, we must porvide the path to this
+const navigate = useNavigate()
+
+  // navigate to product component
+  const gotoProduct=()=>{
+    navigate('/products')
+  }
+
+  then use onclick function and call this function if the funciton is parameterised then call it directly by its name, else use a call back function and call it
+
+
+  // navigate to product component
+  const gotoProduct=(productObj)=>{
+    // navigation logic
+    // while navigating, transfer the product object as well
+    navigate('/products',{state:{product:productObj}})
+  }           path         state object which has key as product and its value is the product object
+
+useLocation() //in react-router: when a component is loaded it will check what was the last component that was used. example: location object in windows
+        ->it knows who has sent the data and we can easily use it
+        const {state} = useLocation()
+        // console.log(state?.product)
+
+//productlist.jsx
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router'
+
+function ProductsList() {
+  const { register, handleSubmit } = useForm();
+
+  let [products, setProducts] = useState([])
+  let [loading, setLoading] = useState(false)
+  let [error, setError] = useState(null)
+  let [productData, setProductData] = useState([]) //searched products data
+  const navigate = useNavigate()
+
+  // navigate to product component
+  const gotoProduct = (productObj) => {
+    // navigation logic
+    // while navigating, transfer the product object as well
+    navigate('/products', { state: { product: productObj } })
+  }
+
+  useEffect(() => {
+    setLoading(true)
+    async function getProducts() {
+      try {
+        let res = await fetch('https://fakestoreapi.com/products')
+        if (res.status === 200) {
+          // extract the json data from the response
+          let productsData = await res.json()
+          // update the state
+          setProducts(productsData)
+          setProductData(productsData)
+        }
+        else {
+          throw new Error('failed to fetch the products data')
+        }
+      } catch (err) {
+        setError(err.message)
+      }
+      finally {
+        setLoading(false)
+      }
+    }
+    getProducts()
+  }, [])
+
+  if (loading === true) {
+    return <p className='text-center text-2xl text-blue-300'>Loading.....</p>
+  }
+  if (error !== null) {
+    return <p className='text-center text-2xl text-red-500'>Error: {error}</p>
+  }
+
+  const searchProduct = (formDataObj) => {
+    let searchTerm = formDataObj.searchInput.toLowerCase();
+    if (searchTerm.trim() === '') {
+      setProductData(products)
+    }
+    // console.log(searchTerm)
+    let filtered = products.filter((productObj) => productObj.title.toLowerCase().includes(searchTerm))
+    setProductData(filtered)
+  }
+
+  return (
+    <div>
+      {/* search by product category */}
+      {/* search form field with a placeholder and a button */}
+      {/* once the use clicks the button then implement a filter function to filter out by category and return the result */}
+      <div className='flex justify-around'>
+        <form onSubmit={handleSubmit(searchProduct)}>
+          <input type="text" placeholder='enter the product' {...register('searchInput')} className='w-90 border mt-10 rounded' />
+          <button className='ml-3 border rounded bg-gray-300 mt-10 '>Search 🔎</button>
+        </form>
+      </div>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12 mt-10'>
+        {/* products list */}
+        {
+          productData.length === 0 ? (
+            <p className='text-red-500 text-center'>
+              No product found!
+            </p>
+          ) : (
+            productData.map((productObj) => (
+              <div
+                onClick={() => gotoProduct(productObj)}
+                key={productObj.id}
+                className='shadow-md rounded-3xl p-10 text-center cursor-pointer bg-gray-100'
+              >
+                <img
+                  className="h-40 object-contain block mx-auto mb-10"
+                  src={productObj.image}
+                  alt={productObj.title}
+                />
+                <h2>{productObj.title}</h2>
+              </div>
+            ))
+          )
+        }
+      </div>
+    </div>
+  )
+}
+
+export default ProductsList
+
+// sortByPrice:
+// JavaScript's .sort() method rearranges elements of an array.
+// It expects a comparison function that returns:
+//   - negative value → a comes before b
+//   - positive value → b comes before a
+//   - 0              → keep order unchanged
+//
+// Since price is numeric, we use subtraction:
+//   a.price - b.price  → ascending
+//   b.price - a.price  → descending
+//
+// Important: .sort() mutates the original array,
+// so we create a copy using [...filteredProductData]
+// before sorting to avoid mutating React state.
+
+
+STATE MANAGEMENT
+lets say there are 20 components all of them depending on state 'x' if the x is changed then the change needs to be broadcasted to all the components of the application
+=>lifting state up / prop-drilling good for only single level one
+->it means sharing the state across the application and achieve sync in state across the application
+=>context api (solves the prop drilling) - small / medium applications
+    we create a separate place named context provider and store the state(it exists outside the component tree) and the components will hence becomes context consumers
+    now the components can directly take the state from the context provider
+
+=>redux / juice-stand () - high level applications
