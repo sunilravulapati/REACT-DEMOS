@@ -169,7 +169,7 @@ function ProductsList() {
   let [products, setProducts] = useState([])
   let [loading, setLoading] = useState(false)
   let [error, setError] = useState(null)
-  let [productData, setProductData] = useState([]) //searched products data
+  let [filteredProductData, setFilteredProductData] = useState([]) //searched products data - could be either by title or by category
   const navigate = useNavigate()
 
   // navigate to product component
@@ -189,7 +189,7 @@ function ProductsList() {
           let productsData = await res.json()
           // update the state
           setProducts(productsData)
-          setProductData(productsData)
+          setFilteredProductData(productsData)
         }
         else {
           throw new Error('failed to fetch the products data')
@@ -211,36 +211,102 @@ function ProductsList() {
     return <p className='text-center text-2xl text-red-500'>Error: {error}</p>
   }
 
+  // const searchProductByTitle = (formDataObj) => {
+  //   // get the input field data
+  //   let searchTerm = formDataObj.searchInput.toLowerCase();
+  //   // if it is empty then set the products to display all the products
+  //   if (searchTerm.trim() === '') {
+  //     setFilteredProductData(products)
+  //     return
+  //   }
+  //   // console.log(searchTerm)
+  //   // filter by title
+  //   let filtered = products.filter((productObj) => productObj.title.toLowerCase().includes(searchTerm))
+  //   // set the filtered data
+  //   setFilteredProductData(filtered)
+  // }
+
+  // const searchProductByCategory = (formDataObj) => {
+  //   // get the input field data
+  //   let searchTerm = formDataObj.searchInput.toLowerCase();
+  //   // if it is empty then set the products to display all the products
+  //   if (searchTerm.trim() === '') {
+  //     setFilteredProductData(products)
+  //     return
+  //   }
+  //   // filter by category
+  //   let filtered = products.filter((productObj) => productObj.category.toLowerCase() === searchTerm)
+  //   // set the filtered data
+  //   setFilteredProductData(filtered)
+  // }
+
+  // combined function
   const searchProduct = (formDataObj) => {
+    // get the input field data
     let searchTerm = formDataObj.searchInput.toLowerCase();
+    // if it is empty then set the products to display all the products
     if (searchTerm.trim() === '') {
-      setProductData(products)
+      setFilteredProductData(products)
+      return
     }
-    // console.log(searchTerm)
-    let filtered = products.filter((productObj) => productObj.title.toLowerCase().includes(searchTerm))
-    setProductData(filtered)
+    // filter by category
+    let filtered = products.filter((productObj) =>
+      productObj.title.toLowerCase().includes(searchTerm) ||
+      productObj.category.toLowerCase() === searchTerm //includes() checks for substring match, not exact match. dont use it for category
+    )
+    // set the filtered data
+    setFilteredProductData(filtered)
   }
 
+  //sort by price
+  const filterByPrice = (dropDown) => {
+    // create a copy of the filteredProducts and do operations on that
+    let copy = [...filteredProductData]
+    // check the dropdown by the option id
+    if (dropDown === 'low') {
+      // ascending order lesser - larger
+      copy.sort((a, b) => a.price - b.price) //sorts the array in place, returns either -neg,positive or zero
+    }
+    else if (dropDown === 'high') {
+      // descending order larger - lesser
+      copy.sort((a, b) => b.price - a.price)
+    }
+    setFilteredProductData(copy)
+  }
   return (
     <div>
       {/* search by product category */}
       {/* search form field with a placeholder and a button */}
       {/* once the use clicks the button then implement a filter function to filter out by category and return the result */}
-      <div className='flex justify-around'>
-        <form onSubmit={handleSubmit(searchProduct)}>
-          <input type="text" placeholder='enter the product' {...register('searchInput')} className='w-90 border mt-10 rounded' />
-          <button className='ml-3 border rounded bg-gray-300 mt-10 '>Search 🔎</button>
+      <div className="flex justify-center items-center">
+        <form
+          onSubmit={handleSubmit(searchProduct)}
+          className="flex gap-3 mt-10"
+        >
+          <input
+            type="text"
+            placeholder="enter the product category/title"
+            {...register('searchInput')}
+            className="border rounded px-3 py-2"
+          />
+          <button type="submit" className="border rounded bg-gray-300 px-4 py-2">Search 🔎</button>
+          <select onChange={(e) => filterByPrice(e.target.value)} className="border rounded bg-gray-200 px-3 py-2">
+            <option value="">Select</option>
+            <option value="low">Low to High</option>
+            <option value="high">High to Low</option>
+          </select>
         </form>
       </div>
+
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12 mt-10'>
         {/* products list */}
         {
-          productData.length === 0 ? (
+          filteredProductData.length === 0 ? (
             <p className='text-red-500 text-center'>
               No product found!
             </p>
           ) : (
-            productData.map((productObj) => (
+            filteredProductData.map((productObj) => (
               <div
                 onClick={() => gotoProduct(productObj)}
                 key={productObj.id}
@@ -252,6 +318,7 @@ function ProductsList() {
                   alt={productObj.title}
                 />
                 <h2>{productObj.title}</h2>
+                <p className='text-green-400'>${productObj.price}</p>
               </div>
             ))
           )
@@ -262,6 +329,7 @@ function ProductsList() {
 }
 
 export default ProductsList
+
 
 // sortByPrice:
 // JavaScript's .sort() method rearranges elements of an array.
@@ -278,6 +346,19 @@ export default ProductsList
 // so we create a copy using [...filteredProductData]
 // before sorting to avoid mutating React state.
 
+TailwindCSS intellisense
+-> npm i tailwindcss @tailwindcss/vite
+-> in vite.config.js:
+    import { defineConfig } from 'vite'
+    import react from '@vitejs/plugin-react'
+    import tailwindcss from '@tailwindcss/vite'
+
+    // https://vite.dev/config/
+    export default defineConfig({
+      plugins: [react(), tailwindcss()],
+    })
+-> in index.css: @import 'tailwindcss';
+->close vscode and then open it again
 
 STATE MANAGEMENT
 lets say there are 20 components all of them depending on state 'x' if the x is changed then the change needs to be broadcasted to all the components of the application
@@ -286,5 +367,70 @@ lets say there are 20 components all of them depending on state 'x' if the x is 
 =>context api (solves the prop drilling) - small / medium applications
     we create a separate place named context provider and store the state(it exists outside the component tree) and the components will hence becomes context consumers
     now the components can directly take the state from the context provider
+3/3/26
+  STEPS
+  ->create a context object
+  ->immediately react will provide: context provider(used to provide state through context object) and context consumer(components consume the state through context object)
+  ->a component can consume the state of context provider with useContext hook
+
+=>create a folder in the src named 'contexts'(everything related to context must be placed in this folder) and then create a js file named 'CounterContext.js'
+//create a context object
+    import {createContext} from 'react'
+    export const CounterContext = createContext() //context is like a channel,it does not have any state by its own, it just passes the state
+//then create a 'CounterContextProvider.jsx' in the same folder
+    import {useState} from 'react'
+    import {CounterContext} from './CounterContext'
+
+    function CounterContextProvider({children}){
+      //state
+      const [counter1,setCounter1] = useState(1)
+      //function to modify state
+      const changeState=()=>{
+        setCounter1(counter1+1)
+      }
+      //return
+      return (
+        <CounterContext.Provider value={{counter1,changeState}}>
+          {children}
+        </CounterContext.Provider>
+      )
+    }
+=>wrap the root component with the CounterContextProvider, the root component(App is in main.jsx)
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import CounterContextProvider from './contexts/CounterContextProvider.jsx'
+
+createRoot(document.getElementById('root')).render(
+    {/* wrap root component with provider */}
+    <CounterContextProvider>
+      <App />
+    </CounterContextProvider>
+)
+
+=>every components can consume the state from the context provider by using useContext hook and context object
+
+import {useContext} from 'react'
+import { CounterContext } from '../contexts/CounterContext'
+function A() {
+  //state
+  let {counter1,changeState} = useContext(CounterContext)
+  console.log("component A rendered")
+  return (
+    <div className='bg-amber-200 shadow-md text-center'>
+      <p className='p-10'>Component A</p>
+      <p>Counter1: {counter1}</p>
+      <button onClick={changeState}>Click me</button> {/* now whatever component have done any change to the state then those changes will be broadcasted to all the currently connectly components */}
+    </div>
+  )
+}
+
+export default A
+
+when we check the console after clicking the submit then all the state connected components will render
+
+IMPORTANT: keep only one state in one context, otherwise it will lead to unnecessary rendering which affects the performance,
+            solutions: create a new context for new states, else use redux or juice stand
 
 =>redux / juice-stand () - high level applications
