@@ -64,11 +64,13 @@ Lifting State Up
 #usually rendering is like batch processing
 
 SIDE-EFFECTS
+external api calls, accessing/interacting with the dom(outside of react as react uses virtual dom)
 -> a component can render initially before displaying the content.
 -> if the component is about to make an api request it should wait until the initial rendering is completed
 -> only after the initial rendering should the component make an api request. if this happens together, it leads to unexpected bugs in the application
 We need to allow the component to make the initial rendering and then later only should api requests must be made
 
+useEffect - used to manage / handle the side effects
 useEffect(()=>{//effect function-outer functions},[//dependency function-optional])
 1. if there is no dependency array - useEffect(()=>{//effect function-outer functions})
     this will run after every render
@@ -429,8 +431,128 @@ function A() {
 export default A
 
 when we check the console after clicking the submit then all the state connected components will render
+->react considers that even whatever is changed that is an object, so even if any component doesnt use all the counter facilities it will be rendered.
+->solution to this is 
 
 IMPORTANT: keep only one state in one context, otherwise it will lead to unnecessary rendering which affects the performance,
-            solutions: create a new context for new states, else use redux or juice stand
+            solutions: create a new context for new states, else use redux or zus-stand
 
-=>redux / juice-stand () - high level applications
+=>redux / zus-stand () - high level applications
+
+9/3/26
+ZUS-STAND
+Advanced state management tools: redux(lot of boilerplate code) and zustand(simple to learn),though both of them are quite same
+
+zustand
+->we are going to create a global store and in that we are going to add the state which is needed by the components(dont keep the states that are not required)
+->if the state is modified by one of the components then the change is broadcasted to all the components that use this state
+
+STEPS:
+1. install zustand : npm i zustand
+2. create a global store, in src create a folder named 'store'
+3. inside that folder create a file with a meaning-full name
+4. import {create} from 'zustand'
+    //create store
+    export const useTest = create((set)=>()) //this creates a custom hook
+    #create(()=>({})) // we have to return an object
+    difference between ()=>{} and ()=>({}) is that the first one is the definition of the function but the second one is going to return us an object
+
+    create((set)=>({
+      //state
+      x:10,
+      //function to modify that state
+      incrementX:()=>set(state=>({x:state.x+1}))
+    }))
+
+    dont directly call the useTest hook, always extract the state that you want individually
+    if there are multiple states, then with zustand extract the states that are needed by the components then whenever changes to those states are done then other components that didnt need a particular state wont be rendered!
+
+    we can also pass external values to the store
+    incrementXByValue: (val) => set(state => ({ x: state.x + val })),
+
+    TestStore.js
+    import { create } from 'zustand'
+    //create store
+    export const useTest = create((set) => ({
+        //state
+        x: 10,
+        y: 20,
+        user:{
+            name:"Vikas",
+            age:21
+        },
+        //function to modify that state
+        incrementX: () => set(state => ({ x: state.x + 1 })),
+        decrementX: () => set(state => ({ x: state.x - 1 })),
+        incrementY: () => set(state => ({ y: state.y + 1 })),
+        incrementXByValue: (val) => set(state => ({ x: state.x + val })),
+        updateUser: (newName) => set(state=>({user:{...state,name:newName,age:19}}))
+    })) //this creates a custom hook
+
+#react uses virtual dom(a copy of the real dom is created and changes are done to that,stored in the memory) while angular uses incremental dom
+#for large scale applications use angular
+#component is the reusable piece which is just like a function, whenever the component is changed it is re-rendered(this is like function which is called multiple times)
+
+useRef Hook: use reference hook
+->this is used to access the reference of the real dom directly
+=>reason this is used: if some action needs to happen instantly(improve the user experience), if we want to maintain few previous values, sometimes when changes occur then the component should not render
+->ref is one of the attribute which can be used to connect the reference elements
+      <input ref={inputRef} type="text" />
+code:
+  let inputRef = useRef(null)
+  useEffect(()=>{
+    //side effect
+    inputRef.current.focus()
+  }, [])
+
+#function in js are first class objects: can be stored in a variable(function expression), can be sent as an argument(callback),can return another function(least used)
+  reason: js supports both oop and functional oriented programming
+  ->function without any function name is an anonymous function
+  ->during the function execution the things that were defined they will stored in the memory(stack) and after the execution of function they are removed from the stack
+  ->sometimes the function can remember the previous values this is due to closure
+
+Closure in JS
+->function with its surrounding states is the closure, this is the default property in js
+->what happens is: whenever a function execution is done, the things in function(which returns another function), will be removed from the callstack and temporarily is stored in heaps(heaps usually store reference types) by the js engine.
+  ex:
+    function increment(){
+      let counter = 0;
+      return function(){
+        counter++;
+        return counter;
+      }
+    }
+    let x = increment() // this now becomes a function which returns the inner function
+    console.log(x()) // terminal: 1
+    //counter variable inside the increment function is 
+
+REST PARAMETERS
+function sum(a,b){
+  return a+b
+}
+getSum(10,20,30,40) // in other languages this causes an error but in js what happens is that it just takes in the needed parameters and returns the result
+
+->two ways: pass the values as an single array, but we dont use this as it could spoil the user experience
+          other way is to make a rest parameter
+          function sum(...a){ // ...a is the rest parameter, this can receive any no. of arguments and packs them into an array
+            console.log(a) // output: [10,20,30,40]
+            return a.reduce((x,y)=>x+y)
+          }
+          getSum(10,20,30,40)
+          ->never place a normal parameter after the rest parameter, always the rest parameter must be placed at the end
+
+Controllers:
+whatever request handlers are there to an api route and we keep that in a normal variable, that is a Controller
+
+before:
+app.get(path,(req,res)=>{}) // api route
+
+after:
+const getUsers = (req,res)=>{} // controller
+app.get(path,getUsers) // api route
+
+#in some other applications
+app.routes.js
+ |    |     |
+file what  extension
+     is done  

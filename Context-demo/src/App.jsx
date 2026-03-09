@@ -7,7 +7,7 @@ function App() {
     <div className='flex justify-around mt-15'>
       <A /> {/* selector of component A, by using components we can create an element */}
       <B />
-      {/* <C /> */}
+      <C />
     </div>
   )
 }

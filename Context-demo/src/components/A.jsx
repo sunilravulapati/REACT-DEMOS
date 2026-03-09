@@ -1,10 +1,17 @@
 import { useContext } from 'react'
+import { useRef } from 'react'
+import { useEffect } from 'react'
 import { CounterContext } from '../contexts/CounterContext'
 import { UserContext } from '../contexts/UserContext'
 function A() {
   //state
   // let {counter1,changeState} = useContext(CounterContext)
   // console.log("component A rendered")
+  let inputRef = useRef(null)
+  useEffect(()=>{
+    //side effect
+    inputRef.current.focus()
+  }, [])
   let { user, changeUserDetails } = useContext(UserContext)
   console.log("component A rendered")
 
@@ -18,6 +25,7 @@ function A() {
       <p>email: {user.email}</p>
       <p>City:{user.city}</p>
       <button onClick={changeUserDetails} className='border bg-blue-200'>Click to change</button>
+      <input ref={inputRef} type="text" />
     </div>
   )
 }
