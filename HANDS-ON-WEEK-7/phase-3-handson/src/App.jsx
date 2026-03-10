@@ -20,14 +20,15 @@ function App() {
         const data = await res.json();
         setCountries(data);
         setFilteredCountries(data);
-      } catch (err) {
+      }
+      catch (err) {
         setError("Failed to fetch countries");
-      } finally {
+      }
+      finally {
         setLoading(false);
       }
     }
     fetchCountries();
-
   }, []);
 
   // search debounce
@@ -43,23 +44,17 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        Country Explorer
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">Country Explorer</h1>
       <SearchBar setQuery={setQuery} />
-      {loading && (
-        <p className="text-center text-lg text-gray-600 mt-6">
-          Loading countries...
-        </p>
-      )}
-      {error && (
-        <p className="text-center text-red-500 mt-6">
-          {error}
-        </p>
-      )}
-      {!loading && !error && (
-        <CountryList countries={filteredCountries} />
-      )}
+      {
+        loading && (<p className="text-center text-lg text-gray-600 mt-6">Loading countries...</p>)
+      }
+      {
+        error && (<p className="text-center text-red-500 mt-6">{error}</p>)
+      }
+      {
+        !loading && !error && (<CountryList countries={filteredCountries} />)
+      }
     </div>
   );
 }
