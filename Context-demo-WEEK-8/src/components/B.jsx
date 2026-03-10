@@ -20,12 +20,12 @@ function B() {
 
   return (
     <div className='bg-amber-200 shadow-md text-center p-10'>
-      <p className=''>Component B</p>
-      <p>Context API</p>
+      <p className='font-bold mt-3'>Component B</p>
+      <p className='font-bold mt-3'>Context API</p>
       <p>Counter1: {counter1}</p>
       <button onClick={changeState} className='border bg-blue-200 p-1'>Click me</button>
       {/* increment x by zustand */}
-      <p>Zustand</p>
+      <p className='font-bold mt-3'>Zustand</p>
       <p className='text-red-400'>X: {xZustand}</p>
       <div className='flex flex-col gap-2'>
         <button onClick={incrementXZustand} className='w-full py-1 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors text-xs shadow-sm'>

@@ -8,10 +8,11 @@ function UserB() {
 
     return (
         <div className='bg-green-200 shadow-md text-center p-10'>
-            <p>UserB</p>
+            <p className='font-bold mt-3'>User B</p>
+            <p className='font-bold mt-3'>Zustand</p>
             <p>User:{name}</p>
             <p>age:{age}</p>
-            <button onClick={() => updateUser("Raju")} className='border bg-blue-200'>Click to change</button>
+            <button onClick={() => updateUser("Raju")} className='border bg-blue-200 rounded-md p-1.5 mt-2'>Click to change</button>
         </div>
     )
 }
